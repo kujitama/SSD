@@ -1,0 +1,33 @@
+dataset:
+  name: VOC
+  year: [2007, 2012]
+data_root: ./datasets/VOCdevkit
+num_classes: 21   # 20 + background
+input_size: 300
+batch_size: 32
+epochs: 300
+optimizer:
+  name: sgd
+  lr: 0.001
+  momentum: 0.9
+  weight_decay: 0.0005
+lr_schedule:
+  name: multistep
+  warmup_epochs: 10
+priors:
+  feature_maps: [38, 19, 10, 5, 3, 1]
+  steps: [8, 16, 32, 64, 100, 300]
+  min_sizes: [30, 60, 111, 162, 213, 264]
+  max_sizes: [60, 111, 162, 213, 264, 315]
+  aspect_ratios: [[2], [2,3], [2,3], [2,3], [2], [2]]
+hnm:
+  neg_pos_ratio: 3
+iou_threshold: 0.5
+backbone:
+  name: vgg16
+  pretrained: true
+  out_channels: [512, 1024, 512, 256, 256, 256]
+amp: true
+eval_interval: 10
+save_top_k: 3
+seed: 1337
