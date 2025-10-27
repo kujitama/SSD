@@ -50,7 +50,7 @@ def train(cfg_path, resume_from=None):
         opt = torch.optim.SGD(model.parameters(), lr=cfg['optimizer']['lr'],
                               momentum=cfg['optimizer']['momentum'],
                               weight_decay=cfg['optimizer']['weight_decay'], nesterov=True)
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(opt, milestones=[100, 200], gamma=0.1)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(opt, milestones=[80, 100, 120], gamma=0.1)
 
     best_map = 0.0
     start_epoch = 0

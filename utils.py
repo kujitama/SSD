@@ -10,7 +10,7 @@ from PIL import Image
 import numpy as np
 import random
 
-from ssd.augment import Compose, Resize, ToTensor, HorizontalFlip, ColorJitter, RandomBlur, RandomCrop, RandomExpand, Normalize, VerticalFlip, PhotometricDistort
+from ssd.augment import Compose, Resize, ToTensor, HorizontalFlip, RandomCrop, RandomExpand, Normalize, PhotometricDistort
 from ssd.backbone import VGG16Backbone
 
 # VOC class names
@@ -117,9 +117,9 @@ class VocDataset(Dataset):
 class TrainTransform:
     def __init__(self, size=300, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):
         self.transform = Compose([
-            PhotometricDistort(),                      # 1. 色調補正（SSD論文）
-            RandomExpand(max_ratio=16.0, p=0.5),        # 2. 拡張
-            RandomCrop(                                 # 3. SSD Sample Crop
+            PhotometricDistort(),                      # 1. 色調補正
+            RandomExpand(max_ratio=4.0, p=1),          # 2. Zoom out
+            RandomCrop(                                # 3. Sample Crop
                 target_size=size,
                 min_scale=0.3,
                 max_scale=1.0,
@@ -127,7 +127,7 @@ class TrainTransform:
                 max_aspect_ratio=2.0,
                 max_attempts=50,
             ),
-            HorizontalFlip(p=0.5),                     # 4. 水平反転（確率0.5に変更）
+            HorizontalFlip(p=0.5),                     # 4. 水平反転
             Resize(size=size),                         # 5. リサイズ
             ToTensor(),                                # 6. Tensor変換
             Normalize(mean=mean, std=std)              # 7. 正規化

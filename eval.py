@@ -5,7 +5,6 @@ from tqdm import tqdm
 from ssd.utils import decode
 import torchvision.ops
 from utils import VOC_CLASSES, ValTransform
-import torchvision.transforms.functional as F
 import wandb
 import json
 
@@ -255,14 +254,21 @@ def calculate_ap(detections, annotations, iou_threshold):
     recalls = tp_cumsum / max(num_annotations, 1)
     precisions = tp_cumsum / (tp_cumsum + fp_cumsum + 1e-8)
     
-    # AP計算（11点補間）
+    # AP計算（全点補間）
+    # precisionを右から左へ補間（各点で、それ以降の最大値を保持）
+    precisions_interp = np.zeros_like(precisions)
+    max_prec = 0.0
+    for i in range(len(precisions) - 1, -1, -1):
+        max_prec = max(max_prec, precisions[i])
+        precisions_interp[i] = max_prec
+    
+    # recall変化点での面積を計算
+    recalls_with_start = np.concatenate([[0.0], recalls])
+    precisions_with_start = np.concatenate([[precisions_interp[0]], precisions_interp])
+    
     ap = 0.0
-    for t in np.arange(0, 1.1, 0.1):
-        p_max = 0.0
-        for i in range(len(precisions)):
-            if recalls[i] >= t:
-                p_max = max(p_max, precisions[i])
-        ap += p_max / 11.0
+    for i in range(len(recalls)):
+        ap += (recalls_with_start[i + 1] - recalls_with_start[i]) * precisions_with_start[i + 1]
     
     return ap
 
